@@ -1,0 +1,35 @@
+---
+- name: Ensure ssh directory exists.
+  file: path="{{ autossh_ssh_dir }}" state=directory mode=0700
+
+- name: Copy ssh key pair.
+  copy: content="{{ item.content }}" dest="{{ autossh_ssh_dir }}/{{ item.filename }}" mode=0600
+  with_items:
+    - "{{ autossh_ssh_keys.public }}"
+    - "{{ autossh_ssh_keys.private }}"
+  register: autossh_ssh_keys_copied
+
+- name: Start ssh agent and add key.
+  shell: ssh-agent sh -c 'ssh-add {{ autossh_ssh_dir }}/{{ autossh_ssh_keys.private.filename }}'
+  when: autossh_ssh_keys_copied.changed
+
+- name: Ensure known hosts file exists.
+  file: path="{{ autossh_known_hosts_file }}" state=touch
+
+- name: Scan for public key of destination server.
+  shell: ssh-keyscan -t {{ autossh_ssh_server_key_type }} {{ autossh_ssh_server }} >> {{ autossh_known_hosts_file }}
+
+- name: Install autossh.
+  yum: name=autossh state=latest
+
+- name: Copy autossh service to systemd.
+  template:
+    src: templates/autossh.service.j2
+    dest: "{{ autossh_systemd_dir }}/{{ autossh_systemd_filename }}"
+    mode: 0644
+
+- name: Enable autossh service.
+  service: name=autossh enabled=true state=restarted
+
+- name: Reload systemctl.
+  command: systemctl daemon-reload

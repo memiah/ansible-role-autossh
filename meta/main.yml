@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: memiah
+  description: Install and configure a single autossh connection on RedHat systems.
+  company: "Memiah Limited"
+  license: "license (BSD, MIT)"
+  min_ansible_version: 1.9
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  galaxy_tags:
+    - autossh
+    - ssh
+    - tunnel
+dependencies: []
