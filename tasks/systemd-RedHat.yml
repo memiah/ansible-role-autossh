@@ -14,10 +14,11 @@
   when: autossh_ssh_keys_copied.changed
 
 - name: Ensure known hosts file exists.
-  file: path="{{ autossh_known_hosts_file }}" state=touch
+  copy: content="" dest={{ autossh_known_hosts_file }} force=no
 
 - name: Scan for public key of destination server.
   shell: ssh-keyscan -t {{ autossh_ssh_server_key_type }} {{ autossh_ssh_server }} >> {{ autossh_known_hosts_file }}
+  changed_when: false
 
 - name: Install autossh.
   yum: name=autossh state=latest
@@ -27,9 +28,12 @@
     src: templates/autossh.service.j2
     dest: "{{ autossh_systemd_dir }}/{{ autossh_systemd_filename }}"
     mode: 0644
+  register: autossh_systemd_service
 
 - name: Enable autossh service.
   service: name=autossh enabled=true state=restarted
+  when: autossh_systemd_service.changed
 
 - name: Reload systemctl.
   command: systemctl daemon-reload
+  when: autossh_systemd_service.changed
