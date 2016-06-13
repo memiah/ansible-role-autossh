@@ -17,8 +17,9 @@
   copy: content="" dest={{ autossh_known_hosts_file }} force=no
 
 - name: Scan for public key of destination server.
-  shell: ssh-keyscan -t {{ autossh_ssh_server_key_type }} {{ autossh_ssh_server }} >> {{ autossh_known_hosts_file }}
+  shell: ssh-keyscan -t {{ autossh_ssh_server_key_type }} {{ item.server }} >> {{ autossh_known_hosts_file }}
   changed_when: false
+  with_items: "{{ autossh_config }}"
 
 - name: Install autossh.
   yum: name=autossh state=latest
@@ -26,14 +27,16 @@
 - name: Copy autossh service to systemd.
   template:
     src: templates/autossh.service.j2
-    dest: "{{ autossh_systemd_dir }}/{{ autossh_systemd_filename }}"
+    dest: "{{ autossh_systemd_dir }}/autossh-{{ item.guid }}.service"
     mode: 0644
+  with_items: "{{ autossh_config }}"
   register: autossh_systemd_service
-
-- name: Enable autossh service.
-  service: name=autossh enabled=true state=restarted
-  when: autossh_systemd_service.changed
 
 - name: Reload systemctl.
   command: systemctl daemon-reload
   when: autossh_systemd_service.changed
+
+- name: Enable autossh service.
+  service: name=autossh-{{ item.guid }} enabled=true state=restarted
+  when: autossh_systemd_service.changed
+  with_items: "{{ autossh_config }}"

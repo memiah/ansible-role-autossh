@@ -31,14 +31,16 @@ Filename used in the systemd_dir to store autossh service.
     autossh_ssh_dir: "/root/.ssh"
     
 Directory to store SSH configuration.
-    
-    autossh_ssh_user: ""
-    
-Username used to connect to remote server.
-    
-    autossh_ssh_server: ""
-    
-IP / hostname of remote server.
+
+    autossh_config:
+      - guid: "example" # Simple lowercase unque identifier (a-z_-).
+        user: "" # Username used to connect to remote server.
+        server: "" # IP / hostname of remote server.
+        local_port: "" # Local port to forward.
+        dest_server: "127.0.0.1" # IP / hostname to use on the remote server, this will most likely be localhost 127.0.0.1.
+        dest_port: "" # Port on the remote server to connect to.
+   
+Add a set of connection properties per connection. user
     
     autossh_ssh_server_key_type: "ecdsa"
     
@@ -47,19 +49,6 @@ Key type of the remote server.
     autossh_known_hosts_file: "{{ autossh_ssh_dir }}/known_hosts"
 
 Path to known hosts file.
-
-    autossh_local_port: ""
-   
-Local port to forward.
-    
-    autossh_dest_server: "127.0.0.1"
-    
-IP / hostname to use on the remote server, this will most likely be
-localhost 127.0.0.1.
-    
-    autossh_dest_port: ""
-    
-Port on the remote server to connect to.
     
     autossh_ssh_public_key: |
       ssh-rsa AAAA...
@@ -99,10 +88,13 @@ Example Playbook
 
 *Inside `vars/main.yml`*:
 
-    autossh_ssh_user: "username"
-    autossh_ssh_server: "remote.server"
-    autossh_local_port: "33061"
-    autossh_dest_port: "3306"
+    autossh_config:
+      - guid: "example"
+        user: "username"
+        server: "remote.server"
+        local_port: "33061"
+        dest_port: "3306"
+        dest_server: "127.0.0.1"
     autossh_ssh_private_key: |
       -----BEGIN RSA PRIVATE KEY-----
       ...
