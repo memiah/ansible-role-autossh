@@ -32,7 +32,7 @@ Filename used in the systemd_dir to store autossh service.
     
 Directory to store SSH configuration.
 
-    autossh_config:
+    autossh_connections:
       - guid: "example" # Simple lowercase unque identifier (a-z_-).
         user: "" # Username used to connect to remote server.
         server: "" # IP / hostname of remote server.
@@ -40,7 +40,7 @@ Directory to store SSH configuration.
         dest_server: "127.0.0.1" # IP / hostname to use on the remote server, this will most likely be localhost 127.0.0.1.
         dest_port: "" # Port on the remote server to connect to.
    
-Add a set of connection properties per connection. user
+Add a set of SSH connection properties per connection.
     
     autossh_ssh_server_key_type: "ecdsa"
     
@@ -88,7 +88,7 @@ Example Playbook
 
 *Inside `vars/main.yml`*:
 
-    autossh_config:
+    autossh_connections:
       - guid: "example"
         user: "username"
         server: "remote.server"

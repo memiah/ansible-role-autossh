@@ -19,7 +19,7 @@
 - name: Scan for public key of destination server.
   shell: ssh-keyscan -t {{ autossh_ssh_server_key_type }} {{ item.server }} >> {{ autossh_known_hosts_file }}
   changed_when: false
-  with_items: "{{ autossh_config }}"
+  with_items: "{{ autossh_connections }}"
 
 - name: Install autossh.
   yum: name=autossh state=latest
@@ -29,7 +29,7 @@
     src: templates/autossh.service.j2
     dest: "{{ autossh_systemd_dir }}/autossh-{{ item.guid }}.service"
     mode: 0644
-  with_items: "{{ autossh_config }}"
+  with_items: "{{ autossh_connections }}"
   register: autossh_systemd_service
 
 - name: Reload systemctl.
@@ -39,4 +39,4 @@
 - name: Enable autossh service.
   service: name=autossh-{{ item.guid }} enabled=true state=restarted
   when: autossh_systemd_service.changed
-  with_items: "{{ autossh_config }}"
+  with_items: "{{ autossh_connections }}"

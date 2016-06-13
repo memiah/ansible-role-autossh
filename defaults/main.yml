@@ -5,7 +5,7 @@ autossh_systemd_dir: "/etc/systemd/system/"
 
 autossh_ssh_server_key_type: "ecdsa"
 
-autossh_config:
+autossh_connections:
   - guid: ""
     user: ""
     server: ""
