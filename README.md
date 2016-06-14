@@ -1,8 +1,8 @@
 AutoSSH
 =======
 
-An Ansible Role that installs and configures an single autossh connection, 
-allowing port forwarding from the local server to a remote server.
+An Ansible Role that installs and configures multiple autossh connections, 
+allowing port forwarding from the local server to remote servers.
 
 Requirements
 ------------
@@ -16,6 +16,17 @@ Role Variables
 Available variables are listed below, along with default values (see 
 `defaults/main.yml`):
 
+    autossh_connections:
+      - id: "example" # Simple unique connection identifier (characters: "a-z,0-9,-").
+        user: "" # Username used to connect to remote server.
+        server: "" # IP / hostname of remote server.
+        server_key_type: "" # Key type of the remote server, defaults to autossh_default_server_key_type. (Optional)
+        local_port: "" # Local port to forward.
+        dest_server: "" # IP / hostname to use on the remote server, defaults to autossh_default_dest_server. (Optional)
+        dest_port: "" # Port on the remote server to connect to.
+   
+Add a set of SSH connection properties per connection.
+    
     autossh_path: "/usr/bin/autossh"
 
 Path to autossh.
@@ -27,17 +38,6 @@ Path to systemd system dir.
     autossh_ssh_dir: "/root/.ssh"
     
 Directory to store SSH configuration.
-
-    autossh_connections:
-      - id: "example" # Simple unique connection identifier (characters: "a-z,0-9,-").
-        user: "" # Username used to connect to remote server.
-        server: "" # IP / hostname of remote server.
-        server_key_type: "" # Key type of the remote server, defaults to autossh_default_server_key_type. (Optional)
-        local_port: "" # Local port to forward.
-        dest_server: "" # IP / hostname to use on the remote server, defaults to autossh_default_dest_server. (Optional)
-        dest_port: "" # Port on the remote server to connect to.
-   
-Add a set of SSH connection properties per connection.
    
     autossh_default_dest_server: "127.0.0.1"
 
@@ -103,7 +103,7 @@ Example Playbook
 Forward local port `33061` to port `3306` on `remote.server`, connecting
 via SSH as `username@remote.server`.
 
-This will create a new service name `autossh-example.service` 
+This will create a new service named `autossh-example.service` 
 *(autossh-{id}.service)* which can be managed by systemctl:
 
     systemctl status autossh-example.service
