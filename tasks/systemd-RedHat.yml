@@ -17,7 +17,7 @@
   copy: content="" dest={{ autossh_known_hosts_file }} force=no
 
 - name: Scan for public key of destination server.
-  shell: ssh-keyscan -t {{ autossh_ssh_server_key_type }} {{ item.server }} >> {{ autossh_known_hosts_file }}
+  shell: ssh-keyscan -t {{ item.server_key_type | default(autossh_default_server_key_type) }} {{ item.server }} >> {{ autossh_known_hosts_file }}
   changed_when: false
   with_items: "{{ autossh_connections }}"
 
@@ -27,7 +27,7 @@
 - name: Copy autossh service to systemd.
   template:
     src: templates/autossh.service.j2
-    dest: "{{ autossh_systemd_dir }}/autossh-{{ item.guid }}.service"
+    dest: "{{ autossh_systemd_dir }}/autossh-{{ item.id | lower | regex_replace('\\s+', '-') | regex_replace('[^a-z0-9-]', '') }}.service"
     mode: 0644
   with_items: "{{ autossh_connections }}"
   register: autossh_systemd_service
@@ -37,6 +37,6 @@
   when: autossh_systemd_service.changed
 
 - name: Enable autossh service.
-  service: name=autossh-{{ item.guid }} enabled=true state=restarted
+  service: name={{ item.dest | basename }} enabled=true state=restarted
   when: autossh_systemd_service.changed
-  with_items: "{{ autossh_connections }}"
+  with_items: "{{ autossh_systemd_service.results }}"

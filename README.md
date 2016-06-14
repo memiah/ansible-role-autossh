@@ -22,29 +22,30 @@ Path to autossh.
 
     autossh_systemd_dir: "/etc/systemd/system/"
 
-Path to system dir.
-
-    autossh_systemd_filename: "autossh.service"
-    
-Filename used in the systemd_dir to store autossh service.
+Path to systemd system dir.
     
     autossh_ssh_dir: "/root/.ssh"
     
 Directory to store SSH configuration.
 
     autossh_connections:
-      - guid: "example" # Simple lowercase unque identifier (a-z_-).
+      - id: "example" # Simple unique connection identifier (characters: "a-z,0-9,-").
         user: "" # Username used to connect to remote server.
         server: "" # IP / hostname of remote server.
+        server_key_type: "" # Key type of the remote server, defaults to autossh_default_server_key_type. (Optional)
         local_port: "" # Local port to forward.
-        dest_server: "127.0.0.1" # IP / hostname to use on the remote server, this will most likely be localhost 127.0.0.1.
+        dest_server: "" # IP / hostname to use on the remote server, defaults to autossh_default_dest_server. (Optional)
         dest_port: "" # Port on the remote server to connect to.
    
 Add a set of SSH connection properties per connection.
+   
+    autossh_default_dest_server: "127.0.0.1"
+
+Default IP / hostname to use on the remote server, this will most likely be localhost / 127.0.0.1.
     
-    autossh_ssh_server_key_type: "ecdsa"
+    autossh_default_server_key_type: "ecdsa"
     
-Key type of the remote server.
+Default key type of the remote server. Override this value for an single server in the `autossh_connections` list. 
     
     autossh_known_hosts_file: "{{ autossh_ssh_dir }}/known_hosts"
 
@@ -89,12 +90,11 @@ Example Playbook
 *Inside `vars/main.yml`*:
 
     autossh_connections:
-      - guid: "example"
+      - id: "example"
         user: "username"
         server: "remote.server"
         local_port: "33061"
         dest_port: "3306"
-        dest_server: "127.0.0.1"
     autossh_ssh_private_key: |
       -----BEGIN RSA PRIVATE KEY-----
       ...
@@ -102,6 +102,13 @@ Example Playbook
 
 Forward local port `33061` to port `3306` on `remote.server`, connecting
 via SSH as `username@remote.server`.
+
+This will create a new service name `autossh-example.service` 
+*(autossh-{id}.service)* which can be managed by systemctl:
+
+    systemctl status autossh-example.service
+    systemctl restart autossh-example.service
+    ...
 
 License
 -------
