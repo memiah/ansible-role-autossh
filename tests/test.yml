@@ -2,4 +2,5 @@
 - hosts: localhost
   remote_user: root
   roles:
+    - { role: geerlingguy.repo-epel, when: ansible_os_family == 'RedHat' }
     - ansible-role-autossh
