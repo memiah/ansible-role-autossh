@@ -13,4 +13,5 @@ galaxy_info:
     - autossh
     - ssh
     - tunnel
-dependencies: []
+dependencies:
+    - geerlingguy.repo-epel
