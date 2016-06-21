@@ -27,5 +27,5 @@
 
 - name: Enable autossh services.
   service: name={{ item.dest | basename }} enabled=true state=restarted
-  when: autossh_systemd_service.changed
+  when: autossh_systemd_service.changed and item.dest is defined
   with_items: "{{ autossh_systemd_service.results }}"
