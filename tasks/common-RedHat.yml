@@ -1,0 +1,14 @@
+---
+- name: Install autossh.
+  package: name=autossh enablerepo=epel state=latest
+
+- name: Ensure ssh directory exists.
+  file: path="{{ autossh_ssh_dir }}" state=directory mode=0700
+
+- name: Ensure known hosts file exists.
+  copy: content="" dest={{ autossh_known_hosts_file }} force=no
+
+- name: Scan for public key of destination server.
+  shell: ssh-keyscan -t {{ item.server_key_type | default(autossh_default_server_key_type) }} {{ item.server }} >> {{ autossh_known_hosts_file }}
+  changed_when: false
+  with_items: "{{ autossh_connections }}"

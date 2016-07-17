@@ -1,3 +1,9 @@
 ---
-- include: tasks/systemd-RedHat.yml
+- include: common-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: systemd-RedHat.yml
   when: ansible_os_family == 'RedHat' and ansible_distribution_major_version | int == 7
+
+- include: sysvinit-RedHat.yml
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version | int < 7

@@ -1,0 +1,12 @@
+---
+- name: Copy autossh services to init.d.
+  template:
+    src: templates/autossh.sysvinit.j2
+    dest: "/etc/init.d/autossh-{{ item.id | lower | regex_replace('\\s+', '-') | regex_replace('[^a-z0-9-]', '') }}"
+    mode: 0755
+  with_items: "{{ autossh_connections }}"
+  register: autossh_sysvinit_service
+
+- name: set INIT status
+  service: name="autossh-{{ item.id | lower | regex_replace('\\s+', '-') | regex_replace('[^a-z0-9-]', '') }}" enabled=yes
+  with_items: "{{ autossh_connections }}"
