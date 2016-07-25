@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# /etc/init.d/mysystem
+# Subsystem file for "MySystem" server
+#
+# chkconfig: 2345 95 05
+# description: AutoSSH service for {{ item.id }} to tunnel port {{ item.local_port }} to {{ item.dest_port }} on {{ item.server }}
+#
+# processname: autossh
+# config: /etc/sysconfig/autossh
+# source function library
+. /etc/rc.d/init.d/functions
+
+# pull in sysconfig settings
+[ -f /etc/sysconfig/autossh ] && . /etc/sysconfig/autossh
+
+RETVAL=0
+prog="autossh-{{ item.id | lower | regex_replace('\\s+', '-') | regex_replace('[^a-z0-9-]', '') }}"
+PIDFILE="/var/run/${prog}.pid"
+
+start() {
+        echo -n $"Starting $prog: "
+        export AUTOSSH_PIDFILE="$PIDFILE"
+	daemon --pidfile="$PIDFILE" {{ autossh_path }} \
+             -f -M 0 -N -v -o "\"ServerAliveInterval 60\"" -o "\"ServerAliveCountMax 3\"" \
+             -L {{ item.bind_address | default(autossh_default_bind_address) }}:{{ item.local_port }}:{{ item.dest_server | default(autossh_default_dest_server) }}:{{ item.dest_port }} \
+             -i {{ item.identity_file | default(autossh_default_identity_file) }} \
+             {{ item.user }}@{{ item.server }}
+	RETVAL=$?
+	[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$prog
+	echo
+        return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping $prog: "
+	killproc -p "$PIDFILE" $exec
+	RETVAL=$?
+	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/$prog
+	echo
+        return $RETVAL
+}
+
+reload() {
+	echo -n $"Reloading $prog:"
+	killproc $prog -HUP
+	RETVAL=$?
+	echo
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	reload)
+		reload
+		;;
+	condrestart)
+		if [ -f /var/lock/subsys/$prog ] ; then
+			stop
+			# avoid race
+			sleep 3
+			start
+		fi
+		;;
+	status)
+		status $prog
+		RETVAL=$?
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
+		RETVAL=1
+esac
+exit $RETVAL

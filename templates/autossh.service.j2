@@ -5,7 +5,7 @@ After=network-online.target
 
 [Service]
 ExecStart={{ autossh_path }} -M 0 -N -q -o "ServerAliveInterval 60" -o "ServerAliveCountMax 3" \
--L {{ item.local_port }}:{{ item.dest_server | default(autossh_default_dest_server) }}:{{ item.dest_port }} \
+-L {{ item.bind_address | default(autossh_default_bind_address) }}:{{ item.local_port }}:{{ item.dest_server | default(autossh_default_dest_server) }}:{{ item.dest_port }} \
 -i {{ item.identity_file | default(autossh_default_identity_file) }} \
 {{ item.user }}@{{ item.server }}
 Restart=always

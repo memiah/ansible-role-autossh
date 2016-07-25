@@ -11,6 +11,8 @@ autossh_default_server_key_type: "ecdsa"
 
 autossh_default_dest_server: "127.0.0.1"
 
+autossh_default_bind_address: "127.0.0.1"
+
 autossh_default_identity_file: "/root/.ssh/id_rsa"
 
 autossh_connections:
