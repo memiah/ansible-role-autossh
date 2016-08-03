@@ -16,4 +16,4 @@ galaxy_info:
     - ssh
     - tunnel
 dependencies:
-    - bluelabsio.repo-epel
+    - geerlingguy.repo-epel
